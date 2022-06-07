@@ -34,7 +34,7 @@ namespace BlockChain.Advanced.Library
         /// The new block generating process is a time-consuming process. <br></br>
         /// But, a transaction can be submitted anytime, <br></br>
         /// so we need to have a place to store transactions before they are processed. <br></br>
-        /// Therefore, we added a new field, PendingTransactions, to store newly added transactions<br></br>
+        /// Therefore, we added a new field, _pendingTransactions, to store newly added transactions<br></br>
         /// </summary>
         private IList<Transaction> _pendingTransactions =  new List<Transaction>(); //composition, DRY for CreateGenesisBlock method
 
@@ -116,7 +116,7 @@ namespace BlockChain.Advanced.Library
         /// Adds a (usual) transaction to blockchain pending transactions
         /// </summary>
         /// <param name="transaction">the transaction to add</param>
-        public void AddTransaction(Transaction transaction) 
+        public void AddPendingTransaction(Transaction transaction) 
         {
             _pendingTransactions.Add(transaction);
         }
@@ -185,7 +185,7 @@ namespace BlockChain.Advanced.Library
         /// methods of the class, I think this name succeeds in hiding every minute implementation detail <br></br>
         /// The caller only needs to know that he has to provide an address - then the new block is mined/added to chain/he gets reward<br></br>
         /// </remarks>
-        public void ProcessPendingTransactions(string minerAddress)
+        public void ProcessPendingTransactions(string minerAddress, out string success)
         {
             //Create a transaction to reward miner. add it to pending transactions.
             AddRewardTransaction(minerAddress);
@@ -195,6 +195,7 @@ namespace BlockChain.Advanced.Library
             AddBlock(block);
             //All pending transactions incorporated in newly created block. Initialize a new empty list of future pending trasactions.
             _pendingTransactions = new List<Transaction>();
+            success = SuccessfulMining(GetLatestBlock(), minerAddress);
         }
         #endregion
 
@@ -225,9 +226,9 @@ namespace BlockChain.Advanced.Library
 
         #region Useful.
         //future reference
-        private string SuccessfulMining(Block block)
+        private string SuccessfulMining(Block block, string address)
         {
-            return $"Block {block.Index} with HASH={block.Hash} successfully mined.";
+            return $"Block {block.Index} with HASH={block.Hash} successfully mined by {address}.";
         }
         #endregion
     }

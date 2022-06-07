@@ -33,6 +33,7 @@ namespace BlockChain.Concole.TestClient
             }
             if (choice == "2")
             {
+                var testAdvanced = new ConsoleTestAdvanced();
                 DashBoard();
             }
             if (choice == "3")

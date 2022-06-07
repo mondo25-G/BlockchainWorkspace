@@ -13,30 +13,44 @@ namespace BlockChain.Advanced.Library
     /// </summary>
     public class Block
     {
+        #region Fields
         //Index of block in chain.
         private int _index;
-        public int Index { get { return _index; } internal set { _index = value; } }
-
         //Time of block creation (to have a history).
         private readonly DateTime _timeStamp;
-        public DateTime TimeStamp { get { return _timeStamp; } }
-        //number of leading zeroes in hash.
+        //"seed" number to mine the hash accounting for chain's difficulty.
         private long _nonce;
-        public long Nonce { get { return _nonce; } }
-
         //contains the hash of the previous block in the chain.
         private string _previousHash;
-        public string PreviousHash { get { return _previousHash; } internal set { _previousHash = value; } }
-
         //hash of the block calculated based on all the properties of the block (change detection).
         private string _hash;
+        //block transaction data
+        private IList<Transaction> _transactions;
+        #endregion
+
+
+        #region Properties
+        //You can access the properties anywhere but only via the blockchain 
+        //or if you decouple the block from the chain in another block instance
+        public int Index { get { return _index; } internal set { _index = value; } }       
+        public DateTime TimeStamp { get { return _timeStamp; } }        
+        public long Nonce { get { return _nonce; } }      
+        public string PreviousHash { get { return _previousHash; } internal set { _previousHash = value; } }       
         public string Hash { get { return _hash; } internal set { _hash = value; } }
 
-        //Transactions Data 
-        private IList<Transaction> _transactions;
-        public IList<Transaction> Transactions { get { return _transactions; } internal set { _transactions = value; } }
+        #region Transaction properties
+        //What the library manipulates
+        internal IList<Transaction> Transactions { get { return _transactions; } set { _transactions = value; } }
+        //what the client sees
+        public IReadOnlyList<Transaction> BlockTransactions { get { return (IReadOnlyList<Transaction>) Transactions; } }
 
-        public Block(DateTime timeStamp, IList<Transaction> transactions,string previousHash="")
+        #endregion
+
+        #endregion
+
+        #region Constructor
+        //you can never call the constructor outside this library,
+        internal Block(DateTime timeStamp, IList<Transaction> transactions,string previousHash="")
         {
             Index = 0;
             _nonce = 0;
@@ -44,18 +58,24 @@ namespace BlockChain.Advanced.Library
             PreviousHash = previousHash;
             Transactions = transactions;
         }
+        #endregion
+
+        #region Methods
         /// <summary>
         /// Calculates the Block's Hash.
         /// </summary>
         /// <returns>the Block's hash</returns>
+        ///<remarks>If I could get it somehow to work for validation of a block given nonce/difficulty I'd make it public<br></br>
+        /// as it currently stands, it's private.</remarks>
         private string CalculateHash()
         {
+            //A very simple implementation.  
             using (SHA256 sha256 = SHA256.Create()) //define a scope.
             {
                 byte[] inputBytes = Encoding.ASCII.GetBytes($"{TimeStamp}-{PreviousHash ?? ""}-{JsonSerializer.Serialize(Transactions)}--{Nonce}");
                 byte[] outputBytes = sha256.ComputeHash(inputBytes);
                 return Convert.ToBase64String(outputBytes);
-            }            
+            }
         }
 
         /// <summary>
@@ -65,16 +85,16 @@ namespace BlockChain.Advanced.Library
         /// </summary>
         /// <param name="PoWdifficulty">an integer that indicates the number of leading zeros required for a generated hash.</param>
         /// <remarks>This is the work that takes place in the block</remarks>
-        public void Mine(int PoWdifficulty)
+        internal void Mine(int PoWdifficulty)
         {
             var leadingZeros = new string('0', PoWdifficulty);
             while (Hash == null || Hash.Substring(0, PoWdifficulty) != leadingZeros)
             {
                 _nonce++;
                 Hash = CalculateHash();
-            }
-            
+            }           
         }
+        #endregion
 
     }
 }
