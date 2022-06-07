@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="BlockChain.Advanced.Library">
+      <HintPath>..\BlockChain.Advanced.Library\bin\Debug\netcoreapp3.1\BlockChain.Advanced.Library.dll</HintPath>
+    </Reference>
+    <Reference Include="BlockChain.Simple.Library">
+      <HintPath>..\BlockChain.Simple.Library\bin\Debug\netcoreapp3.1\BlockChain.Simple.Library.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
